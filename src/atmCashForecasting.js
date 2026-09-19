@@ -129,9 +129,13 @@ function forecastAtmCash(atm, withdrawalHistory, options = {}) {
   };
 }
 
-function buildReplenishmentPlan(atms, withdrawalHistoryByAtm, options = {}) {
+function buildReplenishmentPlan(atms, withdrawalHistoryByAtm = {}, options = {}) {
   if (!Array.isArray(atms)) {
     throw new TypeError('ATMs must be provided as an array.');
+  }
+
+  if (!withdrawalHistoryByAtm || typeof withdrawalHistoryByAtm !== 'object' || Array.isArray(withdrawalHistoryByAtm)) {
+    throw new TypeError('Withdrawal history must be provided as an object keyed by ATM ID.');
   }
 
   const plan = atms.map((atm) => {

@@ -7,10 +7,6 @@
     "test": "node --test",
     "start": "node index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/y2jsathish/CashForecashting.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC"

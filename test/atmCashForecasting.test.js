@@ -159,3 +159,33 @@ test('forecastAtmCash replenishment considers projected service-time balance', (
   assert.equal(forecast.replenish, true);
   assert.equal(forecast.recommendedReplenishment, 46000);
 });
+
+test('buildReplenishmentPlan accepts omitted history and rejects invalid history containers', () => {
+  const plan = buildReplenishmentPlan([
+    {
+      atmId: 'ATM-601',
+      location: 'Retail Plaza',
+      currentCash: 10000,
+      maxCapacity: 20000,
+    },
+  ]);
+
+  assert.equal(plan[0].averageDailyWithdrawal, 0);
+  assert.equal(plan[0].recommendedReplenishment, 0);
+
+  assert.throws(
+    () =>
+      buildReplenishmentPlan(
+        [
+          {
+            atmId: 'ATM-602',
+            location: 'Retail Plaza',
+            currentCash: 10000,
+            maxCapacity: 20000,
+          },
+        ],
+        [],
+      ),
+    /Withdrawal history must be provided as an object keyed by ATM ID/,
+  );
+});

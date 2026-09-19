@@ -39,6 +39,26 @@ function validateAtm(atm) {
   }
 }
 
+function parseHistoryDate(date) {
+  const match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(date);
+  if (!match) {
+    throw new TypeError('Withdrawal history dates must use YYYY-MM-DD format.');
+  }
+
+  const [, year, month, day] = match;
+  const parsedDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+
+  if (
+    parsedDate.getUTCFullYear() !== Number(year) ||
+    parsedDate.getUTCMonth() !== Number(month) - 1 ||
+    parsedDate.getUTCDate() !== Number(day)
+  ) {
+    throw new TypeError('Withdrawal history dates must be valid calendar dates.');
+  }
+
+  return parsedDate.getTime();
+}
+
 function normalizeWithdrawalHistory(withdrawalHistory) {
   if (!Array.isArray(withdrawalHistory)) {
     throw new TypeError('Withdrawal history must be an array.');
@@ -56,6 +76,8 @@ function normalizeWithdrawalHistory(withdrawalHistory) {
       throw new TypeError('Withdrawal history records require a date.');
     }
 
+    parseHistoryDate(date);
+
     if (typeof withdrawalAmount !== 'number' || Number.isNaN(withdrawalAmount) || withdrawalAmount < 0) {
       throw new TypeError('Withdrawal amount must be a non-negative number.');
     }
@@ -64,7 +86,7 @@ function normalizeWithdrawalHistory(withdrawalHistory) {
   }
 
   return Array.from(totalsByDate.entries())
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => parseHistoryDate(left) - parseHistoryDate(right))
     .map(([date, total]) => ({ date, withdrawalAmount: total }));
 }
 
@@ -108,7 +130,7 @@ function forecastAtmCash(atm, withdrawalHistory, options = {}) {
   const serviceTimeCash = Math.max(projectedCash, 0);
   const minimumCashLevel = roundUp(atm.maxCapacity * minimumCashRatio);
   const targetCashLevel = roundUp(atm.maxCapacity * targetCashRatio);
-  const replenish = projectedCash <= minimumCashLevel;
+  const replenish = projectedCash < minimumCashLevel;
   const availableCapacityAtServiceTime = atm.maxCapacity - serviceTimeCash;
   const recommendedReplenishment = replenish
     ? Math.min(availableCapacityAtServiceTime, Math.max(targetCashLevel + safetyStock - serviceTimeCash, 0))

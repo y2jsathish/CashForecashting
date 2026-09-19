@@ -17,6 +17,18 @@ test('calculateAverageDailyWithdrawal aggregates multiple transactions for the s
   assert.equal(average, 4500);
 });
 
+test('calculateAverageDailyWithdrawal sorts single-digit month and day values by date', () => {
+  const average = calculateAverageDailyWithdrawal(
+    [
+      { date: '2026-10-01', withdrawalAmount: 9000 },
+      { date: '2026-9-7', withdrawalAmount: 3000 },
+    ],
+    1,
+  );
+
+  assert.equal(average, 9000);
+});
+
 test('forecastAtmCash recommends replenishment for low projected cash', () => {
   const forecast = forecastAtmCash(
     {
@@ -35,6 +47,26 @@ test('forecastAtmCash recommends replenishment for low projected cash', () => {
   assert.equal(forecast.replenish, true);
   assert.equal(forecast.urgency, 'critical');
   assert.ok(forecast.recommendedReplenishment > 0);
+});
+
+test('forecastAtmCash keeps ATMs at the minimum threshold out of the refill queue', () => {
+  const forecast = forecastAtmCash(
+    {
+      atmId: 'ATM-225',
+      location: 'City Center',
+      currentCash: 16000,
+      maxCapacity: 50000,
+    },
+    [
+      { date: '2026-09-15', withdrawalAmount: 2000 },
+      { date: '2026-09-16', withdrawalAmount: 2000 },
+      { date: '2026-09-17', withdrawalAmount: 2000 },
+    ],
+  );
+
+  assert.equal(forecast.projectedCash, 10000);
+  assert.equal(forecast.minimumCashLevel, 10000);
+  assert.equal(forecast.replenish, false);
 });
 
 test('forecastAtmCash honors custom planning options', () => {

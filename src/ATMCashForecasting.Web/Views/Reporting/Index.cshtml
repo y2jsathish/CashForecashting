@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<h3 class="mb-3">Reports</h3>
+
+<div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Daily Forecast Report</h5>
+                <p class="card-text text-secondary small">ATM, Current Cash, Forecast, Recommended Load.</p>
+                <a class="btn btn-outline-primary btn-sm" href="/api/reports/daily-forecast/excel" download>
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </a>
+                <a class="btn btn-outline-danger btn-sm" href="/api/reports/daily-forecast/pdf" download>
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Replenishment Report</h5>
+                <p class="card-text text-secondary small">Full replenishment activity and load history.</p>
+                <span class="badge text-bg-secondary">Roadmap — see docs/ROADMAP.md</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">ATM Health Report</h5>
+                <p class="card-text text-secondary small">Uptime, offline incidents, status history.</p>
+                <span class="badge text-bg-secondary">Roadmap — see docs/ROADMAP.md</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Cash-Out Report</h5>
+                <p class="card-text text-secondary small">Historical cash-out incidents and root cause.</p>
+                <span class="badge text-bg-secondary">Roadmap — see docs/ROADMAP.md</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Forecast Accuracy Report</h5>
+                <p class="card-text text-secondary small">MAPE trend by ATM, region and method.</p>
+                <a class="btn btn-outline-primary btn-sm" href="/ForecastManagement">Open Forecast Management</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Regional Summary</h5>
+                <p class="card-text text-secondary small">Cash position and risk by region.</p>
+                <a class="btn btn-outline-primary btn-sm" href="/">Open Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>

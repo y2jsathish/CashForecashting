@@ -1,0 +1,66 @@
+@{
+    ViewData["Title"] = "Replenishment Planning";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Replenishment Planning</h3>
+    <button class="btn btn-primary btn-sm" id="generateBtn"><i class="bi bi-arrow-repeat"></i> Generate Recommendations</button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table id="recTable" class="table table-striped table-hover w-100">
+            <thead>
+                <tr>
+                    <th>ATM</th><th>Current Cash</th><th>Forecast Demand</th><th>Recommended Load</th>
+                    <th>Priority</th><th>Risk</th><th>Depletion Date</th><th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const riskClass = { Critical: 'risk-badge-critical', High: 'risk-badge-high', Medium: 'risk-badge-medium', Low: 'risk-badge-low' };
+
+        async function loadRecommendations() {
+            const rows = await AtmCashApi.call('/api/replenishment');
+            $('#recTable').DataTable({
+                destroy: true,
+                data: rows,
+                columns: [
+                    { data: null, render: r => `${r.atmCode} — ${r.atmName}` },
+                    { data: 'currentCash', render: v => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'USD' }) },
+                    { data: 'forecastDemand', render: v => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'USD' }) },
+                    { data: 'recommendedLoadAmount', render: v => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'USD' }) },
+                    { data: 'priority' },
+                    { data: 'riskLevel', render: r => `<span class="badge ${riskClass[r] ?? ''}">${r}</span>` },
+                    { data: 'projectedDepletionDate' },
+                    { data: 'id', render: id => `<button class="btn btn-sm btn-success" onclick="recordLoad(${id})">Record Load</button>` }
+                ],
+                order: [[5, 'desc']]
+            });
+        }
+
+        async function recordLoad(recommendationId) {
+            const amount = prompt('Amount loaded:');
+            if (!amount) return;
+            const row = $('#recTable').DataTable().rows().data().toArray().find(r => r.id === recommendationId);
+            await AtmCashApi.call('/api/replenishment/cash-loads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ atmId: row.atmId, amountLoaded: parseFloat(amount), recommendationId, isPlanned: true, notes: null })
+            });
+            await loadRecommendations();
+        }
+
+        $('#generateBtn').on('click', async function () {
+            await AtmCashApi.call('/api/replenishment/generate', { method: 'POST' });
+            await loadRecommendations();
+        });
+
+        loadRecommendations();
+    </script>
+}

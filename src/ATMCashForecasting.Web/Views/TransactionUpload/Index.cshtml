@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Transaction Upload";
+}
+
+<h3 class="mb-3">Transaction Upload</h3>
+
+<div class="card mb-3">
+    <div class="card-header">CSV Upload</div>
+    <div class="card-body">
+        <p class="text-secondary small">
+            Expected header: <code>AtmCode,TransactionDate,WithdrawalCount,WithdrawalAmount,DepositAmount,RemainingCash,CashLoaded</code>
+        </p>
+        <form id="uploadForm" class="row g-2 align-items-end">
+            <div class="col-auto"><input type="file" name="file" class="form-control" accept=".csv" required /></div>
+            <div class="col-auto"><button type="submit" class="btn btn-primary">Upload</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="card" id="resultsCard" style="display:none;">
+    <div class="card-header">Import Result</div>
+    <div class="card-body">
+        <p id="summaryText"></p>
+        <table class="table table-sm">
+            <thead><tr><th>Row</th><th>ATM Code</th><th>Status</th><th>Errors</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#uploadForm').on('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const token = sessionStorage.getItem('acf-jwt');
+            const response = await fetch('/api/transactions/upload-csv', {
+                method: 'POST',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                body: formData
+            });
+            const result = await response.json();
+
+            $('#summaryText').text(`Total: ${result.totalRows}, Accepted: ${result.acceptedRows}, Rejected: ${result.rejectedRows}`);
+            const body = $('#resultsBody').empty();
+            result.rowResults.forEach(r => {
+                body.append(`<tr class="${r.isValid ? '' : 'table-danger'}"><td>${r.rowNumber}</td><td>${r.atmCode}</td><td>${r.isValid ? 'OK' : 'Rejected'}</td><td>${r.errors.join('; ')}</td></tr>`);
+            });
+            $('#resultsCard').show();
+        });
+    </script>
+}

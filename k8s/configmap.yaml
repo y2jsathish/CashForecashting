@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atmcash-web-config
+  namespace: atm-cash-forecasting
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080"
+  ConnectionStrings__Redis: "atmcash-redis:6379"

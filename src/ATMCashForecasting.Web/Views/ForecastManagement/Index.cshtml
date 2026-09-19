@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Forecast Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Forecast Management</h3>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">Run Forecast</div>
+    <div class="card-body">
+        <form id="runForecastForm" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label class="form-label">Method</label>
+                <select class="form-select" name="method">
+                    <option value="1">Moving Average</option>
+                    <option value="2" selected>Weighted Moving Average</option>
+                    <option value="3">Trend Forecasting</option>
+                    <option value="4">Seasonal Forecasting</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">Horizon</label>
+                <select class="form-select" name="horizon">
+                    <option value="1">Next Day</option>
+                    <option value="3">3 Days</option>
+                    <option value="7" selected>7 Days</option>
+                    <option value="15">15 Days</option>
+                    <option value="30">30 Days</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-play-fill"></i> Run Forecast (All Active ATMs)
+                </button>
+            </div>
+            <div class="col-auto" id="runResult"></div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Open by ATM</div>
+    <div class="card-body">
+        <form class="row g-2" onsubmit="event.preventDefault(); window.location.href='/ForecastManagement/Detail?atmId=' + this.atmId.value;">
+            <div class="col-auto"><input type="number" class="form-control" name="atmId" placeholder="ATM Id" required /></div>
+            <div class="col-auto"><button class="btn btn-outline-primary" type="submit">View Forecast Detail</button></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#runForecastForm').on('submit', async function (e) {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            const body = { atmIds: null, method: parseInt(data.method, 10), horizon: parseInt(data.horizon, 10) };
+            $('#runResult').text('Running...');
+            try {
+                const summary = await AtmCashApi.call('/api/forecast/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                $('#runResult').text(`Processed ${summary.atmsProcessed}, failed ${summary.atmsFailed} (${summary.duration})`);
+            } catch (err) {
+                $('#runResult').text('Failed: ' + err.message);
+            }
+        });
+    </script>
+}

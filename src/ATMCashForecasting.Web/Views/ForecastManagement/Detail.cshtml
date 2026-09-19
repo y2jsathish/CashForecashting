@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Forecast Detail";
+    int atmId = ViewBag.AtmId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Forecast Detail &mdash; ATM #@atmId</h3>
+    <a class="btn btn-outline-secondary btn-sm" asp-controller="ForecastManagement" asp-action="Index">Back</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Forecast vs. Actual (last 30 days) + Forward Forecast</div>
+            <div class="card-body"><canvas id="forecastChart" height="110"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Forward Forecast Points</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0" id="forecastTable">
+                    <thead><tr><th>Date</th><th>Forecast</th><th>Confidence</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const atmId = @atmId;
+
+        async function loadForecast() {
+            const [forward, vsActual] = await Promise.all([
+                AtmCashApi.call(`/api/forecast/${atmId}`),
+                AtmCashApi.call(`/api/dashboard/forecast-vs-actual/${atmId}?days=30`)
+            ]);
+
+            const tbody = $('#forecastTable tbody').empty();
+            forward.forEach(p => {
+                tbody.append(`<tr><td>${p.targetDate}</td><td>${Number(p.forecastedWithdrawalAmount).toLocaleString()}</td><td>${(p.confidenceScore * 100).toFixed(0)}%</td></tr>`);
+            });
+
+            const labels = vsActual.map(p => p.date).concat(forward.map(p => p.targetDate));
+            const actual = vsActual.map(p => p.actual);
+            const forecastPast = vsActual.map(p => p.forecast);
+            const forecastFuture = new Array(vsActual.length).fill(null).concat(forward.map(p => p.forecastedWithdrawalAmount));
+
+            new Chart(document.getElementById('forecastChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Actual', data: actual.concat(new Array(forward.length).fill(null)), borderColor: '#0f9d58', spanGaps: true },
+                        { label: 'Forecast (historical)', data: forecastPast.concat(new Array(forward.length).fill(null)), borderColor: '#0b3d91', borderDash: [4, 4] },
+                        { label: 'Forecast (forward)', data: forecastFuture, borderColor: '#e8710a', borderDash: [2, 2] }
+                    ]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        loadForecast();
+    </script>
+}

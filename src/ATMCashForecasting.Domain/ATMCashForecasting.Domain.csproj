@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ATMCashForecasting.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- IdentityUser<TKey>/IdentityRole<TKey> ship in the ASP.NET Core shared framework
+         (Microsoft.Extensions.Identity.Stores), not as a standalone NuGet package on .NET 8. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

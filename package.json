@@ -1,0 +1,13 @@
+{
+  "name": "cashforecasting",
+  "version": "1.0.0",
+  "description": "ATM Cash Forecasting & Replenishment Management System",
+  "main": "src/atmCashForecasting.js",
+  "scripts": {
+    "test": "node --test",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

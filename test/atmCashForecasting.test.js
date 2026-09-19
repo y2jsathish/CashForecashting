@@ -65,7 +65,7 @@ test('forecastAtmCash honors custom planning options', () => {
   assert.equal(forecast.minimumCashLevel, 5000);
   assert.equal(forecast.targetCashLevel, 25000);
   assert.equal(forecast.safetyStock, 13000);
-  assert.equal(forecast.recommendedReplenishment, 35000);
+  assert.equal(forecast.recommendedReplenishment, 36000);
 });
 
 test('buildReplenishmentPlan orders urgent ATMs first and leaves healthy ATMs untouched', () => {
@@ -133,4 +133,29 @@ test('forecastAtmCash rejects invalid option values', () => {
       ),
     /minimumCashRatio must be between 0 and 1/,
   );
+});
+
+test('forecastAtmCash replenishment considers projected service-time balance', () => {
+  const forecast = forecastAtmCash(
+    {
+      atmId: 'ATM-501',
+      location: 'Hospital Lobby',
+      currentCash: 49000,
+      maxCapacity: 50000,
+    },
+    [
+      { date: '2026-09-15', withdrawalAmount: 15000 },
+      { date: '2026-09-16', withdrawalAmount: 15000 },
+      { date: '2026-09-17', withdrawalAmount: 15000 },
+    ],
+    {
+      forecastDays: 3,
+      targetCashRatio: 0.8,
+      safetyDays: 1,
+    },
+  );
+
+  assert.equal(forecast.projectedCash, 4000);
+  assert.equal(forecast.replenish, true);
+  assert.equal(forecast.recommendedReplenishment, 46000);
 });

@@ -1,7 +1,7 @@
 {
   "name": "cashforecasting",
   "version": "1.0.0",
-  "description": "ATM Cash Forecasting &amp; Replenishment Management System",
+  "description": "ATM Cash Forecasting & Replenishment Management System",
   "main": "src/atmCashForecasting.js",
   "scripts": {
     "test": "node --test",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://localhost:26831/y2jsathish/CashForecashting"
+    "url": "https://github.com/y2jsathish/CashForecashting.git"
   },
   "keywords": [],
   "author": "",

@@ -160,6 +160,26 @@ test('forecastAtmCash replenishment considers projected service-time balance', (
   assert.equal(forecast.recommendedReplenishment, 46000);
 });
 
+test('forecastAtmCash does not double-count negative projected balances', () => {
+  const forecast = forecastAtmCash(
+    {
+      atmId: 'ATM-550',
+      location: 'Convention Center',
+      currentCash: 5000,
+      maxCapacity: 50000,
+    },
+    [
+      { date: '2026-09-15', withdrawalAmount: 15000 },
+      { date: '2026-09-16', withdrawalAmount: 15000 },
+      { date: '2026-09-17', withdrawalAmount: 15000 },
+    ],
+  );
+
+  assert.equal(forecast.projectedCash, -40000);
+  assert.equal(forecast.serviceTimeCash, 0);
+  assert.equal(forecast.recommendedReplenishment, 50000);
+});
+
 test('buildReplenishmentPlan accepts omitted history and rejects invalid history containers', () => {
   const plan = buildReplenishmentPlan([
     {

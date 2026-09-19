@@ -105,12 +105,13 @@ function forecastAtmCash(atm, withdrawalHistory, options = {}) {
   const forecastedDemand = roundUp(averageDailyWithdrawal * forecastDays);
   const safetyStock = roundUp(averageDailyWithdrawal * safetyDays);
   const projectedCash = atm.currentCash - forecastedDemand;
+  const serviceTimeCash = Math.max(projectedCash, 0);
   const minimumCashLevel = roundUp(atm.maxCapacity * minimumCashRatio);
   const targetCashLevel = roundUp(atm.maxCapacity * targetCashRatio);
   const replenish = projectedCash <= minimumCashLevel;
-  const availableCapacityAtServiceTime = atm.maxCapacity - Math.max(projectedCash, 0);
+  const availableCapacityAtServiceTime = atm.maxCapacity - serviceTimeCash;
   const recommendedReplenishment = replenish
-    ? Math.min(availableCapacityAtServiceTime, Math.max(targetCashLevel + safetyStock - projectedCash, 0))
+    ? Math.min(availableCapacityAtServiceTime, Math.max(targetCashLevel + safetyStock - serviceTimeCash, 0))
     : 0;
 
   return {
@@ -120,6 +121,7 @@ function forecastAtmCash(atm, withdrawalHistory, options = {}) {
     forecastDays,
     forecastedDemand,
     projectedCash,
+    serviceTimeCash,
     minimumCashLevel,
     targetCashLevel,
     safetyStock,

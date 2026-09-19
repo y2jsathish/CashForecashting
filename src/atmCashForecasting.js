@@ -2,6 +2,18 @@ function roundUp(value) {
   return Math.ceil(value);
 }
 
+function validatePositiveInteger(value, fieldName) {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new RangeError(`${fieldName} must be a positive integer.`);
+  }
+}
+
+function validateRatio(value, fieldName) {
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0 || value > 1) {
+    throw new RangeError(`${fieldName} must be between 0 and 1.`);
+  }
+}
+
 function validateAtm(atm) {
   if (!atm || typeof atm !== 'object') {
     throw new TypeError('ATM details are required.');
@@ -57,6 +69,7 @@ function normalizeWithdrawalHistory(withdrawalHistory) {
 }
 
 function calculateAverageDailyWithdrawal(withdrawalHistory, lookbackDays = 7) {
+  validatePositiveInteger(lookbackDays, 'lookbackDays');
   const dailyHistory = normalizeWithdrawalHistory(withdrawalHistory);
   if (dailyHistory.length === 0) {
     return 0;
@@ -77,6 +90,16 @@ function forecastAtmCash(atm, withdrawalHistory, options = {}) {
     targetCashRatio = 0.8,
     safetyDays = 1,
   } = options;
+
+  validatePositiveInteger(forecastDays, 'forecastDays');
+  validatePositiveInteger(lookbackDays, 'lookbackDays');
+  validatePositiveInteger(safetyDays, 'safetyDays');
+  validateRatio(minimumCashRatio, 'minimumCashRatio');
+  validateRatio(targetCashRatio, 'targetCashRatio');
+
+  if (targetCashRatio < minimumCashRatio) {
+    throw new RangeError('targetCashRatio must be greater than or equal to minimumCashRatio.');
+  }
 
   const averageDailyWithdrawal = calculateAverageDailyWithdrawal(withdrawalHistory, lookbackDays);
   const forecastedDemand = roundUp(averageDailyWithdrawal * forecastDays);

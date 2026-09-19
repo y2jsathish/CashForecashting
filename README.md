@@ -1,4 +1,4 @@
-# CashForecashting
+# CashForecasting
 
 ATM Cash Forecasting & Replenishment Management System.
 

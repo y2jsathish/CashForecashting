@@ -37,6 +37,37 @@ test('forecastAtmCash recommends replenishment for low projected cash', () => {
   assert.ok(forecast.recommendedReplenishment > 0);
 });
 
+test('forecastAtmCash honors custom planning options', () => {
+  const forecast = forecastAtmCash(
+    {
+      atmId: 'ATM-250',
+      location: 'Corporate Park',
+      currentCash: 15000,
+      maxCapacity: 50000,
+    },
+    [
+      { date: '2026-09-13', withdrawalAmount: 2000 },
+      { date: '2026-09-14', withdrawalAmount: 3000 },
+      { date: '2026-09-15', withdrawalAmount: 6000 },
+      { date: '2026-09-16', withdrawalAmount: 7000 },
+    ],
+    {
+      forecastDays: 2,
+      lookbackDays: 2,
+      minimumCashRatio: 0.1,
+      targetCashRatio: 0.5,
+      safetyDays: 2,
+    },
+  );
+
+  assert.equal(forecast.averageDailyWithdrawal, 6500);
+  assert.equal(forecast.forecastedDemand, 13000);
+  assert.equal(forecast.minimumCashLevel, 5000);
+  assert.equal(forecast.targetCashLevel, 25000);
+  assert.equal(forecast.safetyStock, 13000);
+  assert.equal(forecast.recommendedReplenishment, 35000);
+});
+
 test('buildReplenishmentPlan orders urgent ATMs first and leaves healthy ATMs untouched', () => {
   const plan = buildReplenishmentPlan(
     [
@@ -70,4 +101,36 @@ test('buildReplenishmentPlan orders urgent ATMs first and leaves healthy ATMs un
   assert.equal(plan[1].atmId, 'ATM-302');
   assert.equal(plan[1].replenish, false);
   assert.equal(plan[1].recommendedReplenishment, 0);
+});
+
+test('forecastAtmCash rejects invalid option values', () => {
+  assert.throws(
+    () =>
+      forecastAtmCash(
+        {
+          atmId: 'ATM-401',
+          location: 'Metro Station',
+          currentCash: 10000,
+          maxCapacity: 30000,
+        },
+        [],
+        { lookbackDays: 0 },
+      ),
+    /lookbackDays must be a positive integer/,
+  );
+
+  assert.throws(
+    () =>
+      forecastAtmCash(
+        {
+          atmId: 'ATM-402',
+          location: 'Metro Station',
+          currentCash: 10000,
+          maxCapacity: 30000,
+        },
+        [],
+        { minimumCashRatio: 1.2 },
+      ),
+    /minimumCashRatio must be between 0 and 1/,
+  );
 });

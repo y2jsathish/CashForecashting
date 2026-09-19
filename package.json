@@ -1,5 +1,5 @@
 {
-  "name": "cashforecashting",
+  "name": "cashforecasting",
   "version": "1.0.0",
   "description": "ATM Cash Forecasting &amp; Replenishment Management System",
   "main": "src/atmCashForecasting.js",
